@@ -27,7 +27,7 @@ export default function Workspace(){
  function open(m:any){setError('');setModal(m);setDraft('');if(m.kind==='condition'){try{setDraft(localStorage.getItem(`rs-draft-${m.booking.id}-${m.action}`)||'')}catch{}}}
  const data=session?.data,user=session?.user,manager=user&&user.role!=='student',admin=user?.role==='admin';
  const navigate=(t:string)=>{setTab(t);setQuery('');setCategory('All')};
- const available=(r:any)=>!r.maintenance&&!data.availability.some((b:any)=>b.resourceId===r.id&&+new Date(b.start)<=Date.now()&&+new Date(b.end)>Date.now());
+ const available=(r:any)=>!r.maintenance&&!data.availability.some((b:any)=>b.resourceId===r.id&&(['checked_in','return_pending'].includes(b.status)||+new Date(b.start)<=Date.now()&&+new Date(b.end)>Date.now()));
  const eligible=(r:any)=>!user.verified?'Institutional verification needed':r.training&&!user.training?.includes(r.training)?`${r.training} training required`:r.maintenance?'Under maintenance':'';
  const allBookings=data?.bookings||[],requests=allBookings.filter((b:any)=>b.status==='requested'),myActive=allBookings.filter((b:any)=>['approved','checked_in','return_pending'].includes(b.status));
  const queueFor=(r:any)=>data.queues.find((q:any)=>q.resourceId===r.id);

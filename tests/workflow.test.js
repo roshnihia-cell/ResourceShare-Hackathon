@@ -12,6 +12,9 @@ test('request, approval, condition reports and owner-verified return form a comp
  s=await step(s,owner,'approve',{id:b.id});assert.equal(s.bookings[0].status,'approved');
  s=await step(s,student,'checkin',{id:b.id,pass:b.pass,condition:'Good condition, all leads present'});
  assert.equal(s.bookings[0].status,'checked_in');
+ const later=await step(s,second,'request',{...request,start:'2026-11-01T05:00:00Z',end:'2026-11-01T06:00:00Z'});const laterApproved=await step(later,owner,'approve',{id:later.bookings[1].id});
+ await assert.rejects(()=>step(laterApproved,second,'checkin',{id:later.bookings[1].id,pass:later.bookings[1].pass,condition:'Ready to collect'},'2026-11-01T05:00:00Z'),/previous borrower/);
+
  await rejects(s,second,'checkout',{id:b.id,condition:'all fine'},/borrower/);
  s=await step(s,student,'checkout',{id:b.id,condition:'Clean, supplies switched off'});assert.equal(s.bookings[0].status,'return_pending');
  s=await step(s,owner,'confirm_return',{id:b.id,condition:'Inspected and received all equipment'});assert.equal(s.bookings[0].status,'completed');
