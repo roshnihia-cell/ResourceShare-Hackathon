@@ -1,0 +1,103 @@
+import json,os,re,html
+from reportlab.platypus import SimpleDocTemplate,Paragraph,Spacer,PageBreak,Table,TableStyle,KeepTogether
+from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet,ParagraphStyle
+from reportlab.lib.enums import TA_LEFT
+from reportlab.lib.utils import ImageReader
+from reportlab.graphics.shapes import Drawing,Rect,String,Line,Polygon
+from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.pdfbase import pdfmetrics
+from reportlab.lib.pagesizes import A4
+root=os.path.dirname(os.path.dirname(os.path.abspath(__file__)));out=os.path.join(root,'docs');os.makedirs(out,exist_ok=True)
+font='/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf';bold='/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'
+pdfmetrics.registerFont(TTFont('Body',font));pdfmetrics.registerFont(TTFont('BodyBold',bold))
+blue=colors.HexColor('#2458EC');ink=colors.HexColor('#202B3F');muted=colors.HexColor('#66758A');line=colors.HexColor('#E4E9F1');lime=colors.HexColor('#E2F6AF')
+styles=getSampleStyleSheet()
+styles.add(ParagraphStyle(name='BodyText2',fontName='Body',fontSize=9,leading=15,textColor=ink,spaceAfter=9))
+styles.add(ParagraphStyle(name='Sub2',fontName='BodyBold',fontSize=15,leading=21,textColor=ink,spaceBefore=19,spaceAfter=10,keepWithNext=True))
+styles.add(ParagraphStyle(name='Small2',fontName='Body',fontSize=7.3,leading=11,textColor=muted,spaceAfter=7))
+styles.add(ParagraphStyle(name='Cell2',fontName='Body',fontSize=7.2,leading=11,textColor=ink))
+styles.add(ParagraphStyle(name='CellHead2',fontName='BodyBold',fontSize=7.5,leading=11,textColor=colors.white))
+P=lambda s,style='BodyText2':Paragraph(html.escape(s).replace('\n','<br/>'),styles[style])
+story=[]
+def para(s):story.append(P(s))
+def heading(s):story.append(P(s,'Sub2'))
+def page():story.append(PageBreak())
+def badge(s):story.append(Table([[P(s,'Small2')]],colWidths=[475],style=[('BACKGROUND',(0,0),(-1,-1),lime),('BOX',(0,0),(-1,-1),0.5,colors.HexColor('#D5E8AF')),('LEFTPADDING',(0,0),(-1,-1),12),('TOPPADDING',(0,0),(-1,-1),10),('BOTTOMPADDING',(0,0),(-1,-1),5)]))
+def footer(c,d):
+ w,h=A4;c.setStrokeColor(line);c.line(50,43,w-50,43);c.setFillColor(muted);c.setFont('Body',7);c.drawString(50,29,'RESOURCE SHARE / HACKATHON PROJECT REPORT');c.drawRightString(w-50,29,str(d.page))
+# cover
+story.append(Spacer(1,30));story.append(P('RESOURCE SHARE / INSTITUTIONAL RESOURCE ACCESS','Small2'));story.append(Spacer(1,30))
+story.append(Paragraph('Less sitting idle.<br/><font color="#2458EC">More possibilities.</font>',ParagraphStyle('cover',fontName='BodyBold',fontSize=32,leading=44,textColor=ink,spaceAfter=24)))
+para('ResourceShare connects students, resource owners and administrators through a complete, traceable borrowing workflow for underused campus equipment and spaces.')
+story.append(Spacer(1,20));badge('STAGING RELEASE / 1 NOVEMBER 2026 (INDIA) / REVIEW BEFORE SUBMISSION')
+story.append(Spacer(1,24));heading('Problem statement');para('Unlock Underused Equipment and Spaces. A trusted platform for institutions and communities to share resources safely and fairly.')
+heading('Verified deliverables');para('Shared D1 database, protected lifecycle operations, conflict prevention, FIFO promotion, condition reports, owner-verified returns, audit verification and a public isolated judge demo. Eighteen automated tests and a live HTTP workflow test pass.')
+heading('Read this disclosure first');para('This is an upgrade to pre-existing ResourceShare code. All 50 requested features are accounted for: 20 implemented and tested, 22 partial, 3 demonstration-only and 5 planned. Google OAuth, email delivery, runtime AI and scheduled background jobs are not configured. Official build-window dates and team details still need confirmation.')
+story.append(P('Live staging: https://resourceshare-upgrade-staging.electhill.chatgpt.site\nGitHub: roshnihia-cell/ResourceShare-Hackathon\nBranch: resourceshare-50-features-upgrade','Small2'))
+page()
+heading('01 / Executive summary and selected use case')
+para('ResourceShare starts with a single campus: students borrow physics laboratory space, projectors, microscopes, cameras, computing equipment and a seminar hall. Owners retain approval authority; administrators oversee identity, qualifications, policy and disputes. The full request-to-return state machine persists in a shared database. Judges can operate every role in a clearly labeled isolated fictional workspace.')
+heading('02 / Why the problem matters')
+para('Valuable resources can remain idle because availability, permission and responsibility are unclear. Informal messaging produces conflicting requests, invisible queues and little evidence of equipment condition. ResourceShare makes access reviewable and records responsibility at both ends of a borrowing.')
+heading('03 / Target users and adoption')
+para('Student borrowers need discoverability, transparent access and clear pickup/return expectations. Resource owners need qualification checks, scheduling control and condition evidence. Campus administrators need policy, incident oversight and utilization signals. Community institutions could adopt the workflow after identity, data retention and operational responsibilities are formalized.')
+heading('04 / Complete borrowing lifecycle')
+steps=[('01','Owner lists a resource','Category, location, safety, qualification and deposit record.'),('02','Student requests a time','Eligibility, purpose, agreement, request cap and interval checks.'),('03','Owner reviews the request','Approve or reject with a reason. Conflicts join FIFO.'),('04','Borrower checks in','Private time-limited pass plus before-use condition.'),('05','Borrower checks out','After-use condition moves the booking to return pending.'),('06','Owner verifies return','Inspection note completes the handover and promotes a compatible queue request.'),('07','History stays reviewable','User-scoped notifications, receipt and hash-linked event history.')]
+for n,title,desc in steps:story.append(P(n+' / '+title,'Small2'));para(desc)
+page();heading('05 / System architecture')
+d=Drawing(475,295)
+nodes=[(150,240,175,42,'React workspace'),(150,155,175,46,'Workspace API + role checks'),(5,70,135,48,'Platform identity'),(170,65,145,50,'D1 state + revision'),(340,65,130,50,'Audit + notifications')]
+for x,y,w,h,t in nodes:d.add(Rect(x,y,w,h,rx=8,ry=8,fillColor=colors.HexColor('#EEF3FF') if y>100 else colors.HexColor('#F1F5EC'),strokeColor=line));d.add(String(x+w/2,y+h/2-3,t,textAnchor='middle',fontName='BodyBold',fontSize=8,fillColor=ink))
+for x1,y1,x2,y2 in [(237,240,237,201),(237,155,242,115),(140,94,150,169),(325,174,405,115)]:d.add(Line(x1,y1,x2,y2,strokeColor=blue,strokeWidth=1.3))
+story.append(d)
+para('The static React/Vite prototype is preserved at /legacy. The new server-capable React/Vinext starter adds a Cloudflare Worker API, D1 database and trusted hosting identity boundary. A supported server runtime was necessary because browser-only state cannot enforce authorization or prevent competing allocations.')
+heading('06 / Database structure')
+para('One physical workspaces table stores id, revision, data and updated_at. The JSON data document contains profiles, resources, bookings, incidents, training evidence references, feedback, notifications, policy and audit events. campus:one identifies the real authenticated workspace; a random demo cookie identifies each isolated fictional workspace.')
+para('Each mutation loads the current revision, authorizes the actor, applies domain checks and writes a new document only if the revision is unchanged. Zero affected rows returns HTTP 409. Booking and audit updates therefore share one atomic state update. This intentionally small design serializes writes and requires normalization/pagination for larger deployments.')
+heading('07 / Authentication and authorization')
+para('The platform supplies stable user ID and email headers after ChatGPT sign-in. New real users start as unverified students. The authenticated Site owner is bootstrapped using a server-only admin allowlist; administrators review membership and can grant owner roles. Request bodies cannot set real roles. Every mutation checks ownership or role again on the server. Demo role selection applies only to its isolated workspace.')
+para('Google/Gmail OAuth and application email verification remain unconfigured. They are not represented as working integrations. Production HTTPS demo cookies are HttpOnly, Secure and SameSite=Strict; local HTTP preview has a named-host exception.')
+page();heading('08 / Fairness and allocation')
+para('FIFO uses a monotonic request sequence. Overlapping live requests enter the waiting list. An owner cannot approve over an allocated interval or bypass an earlier overlapping pending/waiting request. Cancellation, verified return, maintenance completion or an operational no-show sweep promotes the earliest eligible compatible request. Promotion produces a new request for human approval, not automatic permission to enter.')
+para('Administrators configure maximum open requests per person, maximum duration and no-show grace. Jain\'s index is (sum of allocation counts)^2 divided by n times the sum of squared counts. Empty/all-zero counts display 1 by convention. This measures allocation-count distribution, not differences in need, duration or entitlement.')
+heading('09 / Safety, privacy and human oversight')
+para('Resource-specific instructions and an exact agreement snapshot are saved with each request. Before-use and after-use reports are separate from the owner\'s return verification. Training evidence references require administrative review. Incidents retain original descriptions and require human resolution notes. Urgent reports reach the in-app inbox only; immediate danger must be handled through campus security directly.')
+para('Student responses omit other people\'s booking details, profile records and private passes. The demonstration data is fictional. Deposits are ledger entries with collection/refund guards; no money is collected. No biometrics, real student identity documents or external emergency contacts were introduced.')
+heading('10 / Audit integrity and operational limits')
+para('Events contain previous and current SHA-256 hashes. Administrator verification detects inconsistent changes within the saved chain. A privileged database operator could regenerate the chain, so this is not an independently anchored or immutable audit service. Database authorization, access review and retention remain essential.')
+para('The campus state document and full event history grow with activity. The application imposes a 10,000-event guard, but production needs rate limiting, demo cleanup, normalization, indexes, pagination, backups and retention controls. New institution federation and performance under real campus load are not verified.')
+heading('11 / AI tools and external services')
+para('ChatGPT/Codex assisted implementation, design, tests, documentation and deployment. There are no runtime model calls. Kit suggestions are fixed transparent rules and incident text is human-authored. The technology stack includes React, Vinext/Vite, Cloudflare Workers/D1, Drizzle, lucide-react and qrcode-generator; the dependency lockfile records exact versions. Google Fonts has system-font fallbacks.')
+page();heading('12 / Testing evidence')
+para('The original four booking tests and original Vite build passed before development. The upgraded suite now has 18 passing tests, covering successful lifecycle, queue promotion, role/ownership rejection, invalid intervals and caps, pass validation, qualification review, incident resolution, deposit/refund and feedback, immutable agreement snapshots, admin role assignment, audit edits, SQLite stale-writer behavior, no-show release and extension conflicts.')
+para('The live HTTP integration test passed against the public staging origin. It exercised actual D1 persistence, owner resource listing, student authorization rejection, stale revision 409, FIFO waiting, authenticated-demo check-in/out, owner return verification, compatible queue promotion, full audit verification and demo exit. A separate browser test exercised request, approval, condition reporting and owner-confirmed completion on local preview.')
+para('A preview-only Secure-cookie issue was discovered in browser testing and repaired for named local HTTP hosts. Production HTTPS retains the secure-cookie flags. The browser also confirmed resource search. Interactive ChatGPT sign-in/logout, physical-device responsiveness, physical-camera scanning and formal accessibility compliance have not been certified.')
+heading('13 / Judge access and demonstration')
+para('Open the staging site and choose Try the judge demo. Asha and Kavin are trained fictional students, Maya is deliberately untrained, Dr. Meera is the resource owner and Campus Admin is the reviewer. The dropdown switches only demo identities. Request an interval that includes the planned check-in time; future bookings cannot check in early. Use the judge guide for a complete four-minute workflow and negative checks.')
+heading('14 / Known limitations')
+para('Google OAuth, email delivery, runtime AI recommendations/summaries, recurring reminders and cross-institution federation are planned. File uploads, smart calendar, maintenance logs, payment processing, multi-party authorization, outbound owner handover acknowledgment, translation and offline synchronization are partial. QR codes produce access deep links; scanning in another browser does not transfer the session. The map and kit suggestions are demonstration illustrations. The 50-feature appendix gives exact statuses.')
+heading('15 / Improvements and adoption potential')
+para('Before a campus pilot: connect official membership, configure supported identity/email, add private evidence storage and trusted schedules, formalize security contacts and return procedures, define retention/backup policies and independently review authorization/accessibility. Collect representative activity before evaluating forecasts. Use human review for any AI-assisted incident summaries or consequential access decisions.')
+page();heading('16 / Originality and build-window disclosure')
+para('The source baseline is b689b07a852aac10056181bc30fbe5adccc39370 on resourceshare-final-submission. It already contained booking, queue, fairness, audit and UI code developed with earlier ChatGPT assistance. Both existing branches have unrelated history but identical application source. The new resourceshare-50-features-upgrade branch preserves its actual baseline parent and commit history; no timestamps or earlier work are fabricated.')
+para('The supplied Sites React/Vinext starter and open-source libraries are disclosed. The official 48-hour dates and timezone have not been supplied. The team must identify components developed before, during and after the official window, and verify compliance with organizers before submitting. This report makes no all-original-in-48-hours claim.')
+heading('17 / Team information awaiting confirmation')
+for s in ['Team name: to be supplied','Team leader and full member names: to be supplied','College/institution: to be confirmed','Submission contact email: to be supplied','Actual role and contribution of every member: to be supplied','Official build-window start/end and timezone: to be supplied']:para(s)
+heading('18 / Deployment and reproducibility')
+para('The new Site has its own staging identity and D1 database. The earlier live site is not replaced. Authored source is committed to the dedicated GitHub branch and the corresponding Site source repository; the hosted archive is built from the Site repository commit. Node 22.13+ and pnpm are required. Apply the generated D1 schema before local preview. The old static Netlify/Vercel settings do not deploy this Worker branch.')
+heading('19 / Submission materials')
+para('This report accompanies the judge guide, complete feature report, architecture diagram/schema description, test results, demo recording script, environment template, deployment/troubleshooting instructions, AI/prior-code disclosure and draft submission answers. No hosted video has been produced. The provided Google Form could not be retrieved through the search tool; the answer draft is adaptable and the form has not been submitted.')
+heading('20 / Review before final submission')
+para('Confirm team details and the official build window. Review the truthful feature status and evidence, record/upload a demonstration if required, and inspect the final Google Form before submitting. Existing branches remain unmerged and the previous site remains intact.')
+page();heading('Appendix / All 50 requested features')
+para('Implemented and tested describes implemented behavior with automated or recorded workflow coverage. Partial and demonstration-only entries must not be presented as full production features.')
+rows=json.load(open(os.path.join(out,'FEATURE_STATUS.json')))
+body=[[P('#','CellHead2'),P('Feature / status','CellHead2'),P('Evidence or limitation','CellHead2')]]
+for n,name,status,note in rows:body.append([P(str(n),'Cell2'),P(name+'\n'+status,'Cell2'),P(note,'Cell2')])
+t=Table(body,colWidths=[31,151,293],repeatRows=1,hAlign='LEFT');t.setStyle(TableStyle([('BACKGROUND',(0,0),(-1,0),blue),('VALIGN',(0,0),(-1,-1),'TOP'),('LEFTPADDING',(0,0),(-1,-1),8),('RIGHTPADDING',(0,0),(-1,-1),8),('TOPPADDING',(0,0),(-1,-1),9),('BOTTOMPADDING',(0,0),(-1,-1),9),('ROWBACKGROUNDS',(0,1),(-1,-1),[colors.white,colors.HexColor('#F5F7FB')]),('LINEBELOW',(0,0),(-1,-1),.3,line)]));story.append(t)
+SimpleDocTemplate(os.path.join(out,'ResourceShare_Project_Report.pdf'),pagesize=A4,rightMargin=60,leftMargin=60,topMargin=46,bottomMargin=62,title='ResourceShare - Project Report',author='ResourceShare project documentation; AI assistance disclosed').build(story,onFirstPage=footer,onLaterPages=footer)
+# Export the same precise topology as a standalone SVG.
+svg='''<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="660" viewBox="0 0 1000 660"><rect width="1000" height="660" fill="#f7f9fc"/><style>text{font-family:Arial,sans-serif;fill:#243149}.head{font-size:30px;font-weight:700}.label{font-size:18px;font-weight:600}.note{font-size:14px;fill:#687991}</style><text x="55" y="65" class="head">ResourceShare / system architecture</text><text x="55" y="95" class="note">Server-enforced permissions and atomic shared availability</text><g fill="none" stroke="#2458ec" stroke-width="2"><path d="M500 220V290"/><path d="M500 365V455"/><path d="M270 490L405 365"/><path d="M600 365L780 455"/></g><g stroke="#dce4f0" fill="#eef3ff"><rect x="325" y="145" width="350" height="75" rx="14"/><rect x="325" y="290" width="350" height="75" rx="14"/></g><g stroke="#dde7d1" fill="#f0f6e8"><rect x="65" y="455" width="250" height="95" rx="14"/><rect x="375" y="455" width="250" height="95" rx="14"/><rect x="685" y="455" width="250" height="95" rx="14"/></g><g text-anchor="middle"><text x="500" y="180" class="label">React workspace</text><text x="500" y="203" class="note">Student / owner / administrator</text><text x="500" y="322" class="label">Workspace API + domain rules</text><text x="500" y="347" class="note">Identity, roles, eligibility, FIFO, lifecycle</text><text x="190" y="493" class="label">Platform identity</text><text x="190" y="519" class="note">Trusted hosting headers</text><text x="500" y="493" class="label">D1 state + revision</text><text x="500" y="519" class="note">Atomic compare-and-swap</text><text x="810" y="493" class="label">Audit + notifications</text><text x="810" y="519" class="note">In the same atomic state</text></g><text x="55" y="615" class="note">Original browser-local prototype retained at /legacy. Google OAuth and email delivery are not configured.</text></svg>'''
+open(os.path.join(out,'architecture.svg'),'w').write(svg)
+print(os.path.join(out,'ResourceShare_Project_Report.pdf'))
