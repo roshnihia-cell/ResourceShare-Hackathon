@@ -1,3 +1,47 @@
+# Render deployment status - 3 November 2026
+
+This branch (`resourceshare-render-static-fix`) is the original **frontend-only React/Vite prototype**. It builds to `dist`. It has no backend, database, authentication provider or `start` script. Deploy it as a **Render Static Site**, not a Node Web Service.
+
+- Build command: `npm ci && npm run build`
+- Publish directory: `dist`
+- Branch: `resourceshare-render-static-fix`
+- Root directory: leave blank (repository root)
+- SPA rule: Rewrite `/*` to `/index.html`
+- Startup command: none; Static Sites do not run an application process.
+
+The Blueprint is in [render.yaml](render.yaml). Changing this file does not convert an existing manually created Node Web Service. Create a new Static Site without deleting the failed service. See [exact dashboard steps and verification](docs/RENDER_DEPLOYMENT.md).
+
+**Render publication remains pending account authorization.** No Render URL is claimed as deployed by this change. Exit 127 is consistent with a missing startup executable; the exact failed command cannot be confirmed without the actual Render startup log/settings.
+
+## Which version should judges test?
+
+| Version | Persistence and access | Use |
+| --- | --- | --- |
+| This Render static branch | Browser-local names and localStorage; no secure account roles | Original booking/FIFO/fairness prototype |
+| `resourceshare-50-features-upgrade` | D1-backed state, server-side role checks, approvals, condition reports and owner-verified return | More complete end-to-end hackathon workflow |
+
+The separately hosted upgraded workspace is https://resourceshare-upgrade-staging.electhill.chatgpt.site . Its existence is not evidence that Render has deployed. The upgraded Worker/D1 application cannot be deployed by publishing its `dist` folder as a Render Static Site.
+
+[Full-stack feature status and limitations](https://github.com/roshnihia-cell/ResourceShare-Hackathon/blob/resourceshare-50-features-upgrade/docs/FEATURE_STATUS.md) and [judge guide](https://github.com/roshnihia-cell/ResourceShare-Hackathon/blob/resourceshare-50-features-upgrade/docs/JUDGE_GUIDE.md) are on their separate branch. No branches have been merged or force-pushed.
+
+## Static demo instructions
+
+1. Enter a fictional name, book Physics Laboratory and confirm.
+2. Change to a second fictional name and join its FIFO waiting list.
+3. Release or cancel the first booking. The next waiting participant is allocated automatically.
+4. Inspect Bookings, Fairness Lab and Audit Trail; export JSON.
+5. Refresh in the same browser to check local persistence. A private browser starts independent data.
+
+These steps do not demonstrate login, owner authorization, time-slot scheduling or verified check-in/return. Those features are absent from this static branch. Do not describe this deployment as a production multi-user system.
+
+## Disclosure
+
+This is pre-existing ResourceShare code. ChatGPT/Codex assisted the earlier prototype and this deployment audit. This change retains all application files and commit history, and only adjusts the Render branch selection/publish path and documentation. Official build-window times and member contributions have not been supplied, so no all-work-created-within-48-hours claim is made.
+
+---
+
+The original README below is retained as historical project documentation. Its prior upload-status and submission-branch notes are superseded by the status above.
+
 # ResourceShare — Fair Resource Allocation Prototype
 
 A campus resource-booking demo with a midnight black (#0B0B0F), electric cobalt (#1255FF), and acid lime (#D7FF3F) dashboard.

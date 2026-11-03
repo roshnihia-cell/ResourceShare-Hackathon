@@ -2,8 +2,9 @@ services:
   - type: web
     name: resourceshare-hackathon
     runtime: static
+    branch: resourceshare-render-static-fix
     buildCommand: npm ci && npm run build
-    staticPublishPath: ./dist
+    staticPublishPath: dist
     routes:
       - type: rewrite
         source: /*
